@@ -64,13 +64,13 @@ export const useTaskStore = defineStore('tasks', () => {
 
   // byStatus is a plain function, not a computed. This means it does not cache. Every time a component calls byStatus('todo'), it filters the full array again.
   // function byStatus(status: Status) {
-  //   console.log('filtering') 
+  //   console.log('byStatus!') 
   //   return tasks.value.filter(t => t.status === status)
   // }
 
   // byStatus is now Creating a computed property and it returns a plain object (the map). Vue will run this function once, cache the result, and only re-run it when tasks.value changes
   const byStatus = computed(() => {
-    console.log('taskByStatus re-ran')
+    // console.log('byStatus!')
 
     // map is an object where every key is a Status and every value is an array of Tasks with that status
     const map: Record<Status, Task[]> = {
