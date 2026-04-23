@@ -14,7 +14,7 @@ export interface Task {
   status: Status
 }
 
-// localStorage helpers
+// localStorage helpers --> will replace this part with Laravel APIs
 const STORAGE_KEY = 'kanban-tasks'
 
 function load(): Task[] {
@@ -39,30 +39,30 @@ export const useTaskStore = defineStore('tasks', () => {
 
   // addTask takes a task without an id, generates one, pushes it to the array, then saves.
   function addTask(task: Omit<Task, 'id'>) {
-    tasks.value.push({ ...task, id: crypto.randomUUID() })
-    save(tasks.value)
+    tasks.value.push({ ...task, id: crypto.randomUUID() }) // update store
+    save(tasks.value)                                      // persist the change                              
   }
 
   // updateTask takes a task ID and an object containing the updates, finds the task, and updates it.
   function updateTask(id: string, updates: Partial<Omit<Task, 'id'>>) {
     const i = tasks.value.findIndex(t => t.id === id)
     if (i !== -1) {
-      tasks.value[i] = { ...tasks.value[i], ...updates } as Task
-      save(tasks.value)
+      tasks.value[i] = { ...tasks.value[i], ...updates } as Task  // update store
+      save(tasks.value)                                           // persist the change  
     }
   }
 
   // deleteTask replaces the array with a filtered version that excludes the target id.
   function deleteTask(id: string) {
-    tasks.value = tasks.value.filter(t => t.id !== id)
-    save(tasks.value)
+    tasks.value = tasks.value.filter(t => t.id !== id)  // update store
+    save(tasks.value)                                   // persist the change
   }
 
   function moveTask(id: string, status: Status) {
-    updateTask(id, { status })
+    updateTask(id, { status: status })
   }
 
-  // byStatus is a plain function, not a computed. This means it does not cache. Every time a component calls byStatus('todo'), it filters the full array again.
+  // byStatus was a plain function, not a computed. This means it does not cache. Every time a component calls byStatus('todo'), it filters the full array again.
   // function byStatus(status: Status) {
   //   console.log('byStatus!') 
   //   return tasks.value.filter(t => t.status === status)

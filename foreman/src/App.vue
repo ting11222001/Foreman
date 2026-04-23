@@ -57,7 +57,9 @@ function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
     </header>
 
     <main class="board">
+      <!-- BoardColumn is one column on your task board (e.g. "To Do", "In Progress", "Done"). It receives a list of tasks, shows them as cards, and handles drag-and-drop so users can move tasks between columns. -->
       <!-- store.byStatus[col.status]   // look up this key in the object e.g. col.status is a string like 'todo', so this is the same as writing: store.byStatus['todo'], which gives you the array of todo tasks directly from the cached map. -->
+      <!-- @dropTask="store.moveTask" is equivalent to: @dropTask="(id, status) => store.moveTask(id, status)" -->
       <BoardColumn
         v-for="col in columns"
         :key="col.status"
