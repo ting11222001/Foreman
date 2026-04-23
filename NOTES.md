@@ -174,3 +174,131 @@ Output:
 
    INFO  Controller [C:\...\Foreman\foreman-api\app\Http\Controllers\TaskController.php] created successfully.  
 ```
+
+### Running migrations
+
+Fill out the file, `2026_04_23_140601_create_tasks_table.php`, TypeScript Task interface exactly, then run:
+```
+php artisan migrate
+```
+
+Output:
+```
+INFO  Running migrations.  
+
+  2026_04_23_140601_create_tasks_table .................................................................................. 10.15ms DONE
+```
+
+### Start the Laravel server:
+
+```
+php artisan serve
+```
+
+but Laravel 11 removed `api.php` by default. You need to create it. 
+
+Run this to create `routes/api.php`:
+```
+php artisan install:api
+```
+
+It does three things:
+```
+Creates routes/api.php where you define your API routes
+Adds the API middleware so Laravel knows to handle /api/... requests
+Creates a personal_access_tokens table for API authentication (you can ignore this for now)
+```
+
+Add `Route::apiResource` in `api.php`:
+ 
+Route::apiResource automatically creates all 4 routes for you:
+```
+GET /api/tasks → index
+POST /api/tasks → store
+PUT /api/tasks/{task} → update
+DELETE /api/tasks/{task} → destroy
+```
+
+Save the file, then run:
+```
+php artisan serve
+```
+
+It will show something like http://127.0.0.1:8000.
+
+Then in Postman, make a GET request to:
+```
+http://127.0.0.1:8000/api/tasks
+```
+
+## Testing with Postman
+
+### Get
+
+Run:
+```
+http://127.0.0.1:8000/api/tasks
+```
+
+
+### POST /api/tasks
+
+Run:
+```
+POST http://127.0.0.1:8000/api/tasks
+```
+
+Body > Raw > JSON:
+```
+{
+    "title": "test",
+    "description": "test",
+    "priority": "low",
+    "status": "todo"
+    
+}
+```
+
+It should respond with 201 Created.
+
+### GET /api/tasks
+
+Run:
+```
+GET http://127.0.0.1:8000/api/tasks
+```
+
+It should respond with 200 OK.
+
+
+### PUT /api/tasks/{task} 
+
+In Postman, replace {task} with the actual task ID from database.
+
+For example, update the task with `id = 019dbca9-826f-7212-b5dc-0029389f8de2`:
+```
+PUT http://localhost:8000/api/tasks/019dbca9-826f-7212-b5dc-0029389f8de2
+```
+
+Then in the Body tab, select raw and JSON, and send only the fields you want to change:
+```
+{
+  "title": "Updated title",
+  "status": "inprogress"
+}
+```
+
+It should respond with 200 OK.
+
+### DELETE /api/tasks/{task}
+
+Create another task first and delete this new task with this endpoint.
+
+Get the new task's id and feed in the endpoint.
+
+For example, delete the task with `id = 019dbcb1-2441-7132-8374-181c9bdea3df`:
+```
+DELETE http://localhost:8000/api/tasks/019dbcb1-2441-7132-8374-181c9bdea3df
+```
+
+It should respond with 204 No content.
