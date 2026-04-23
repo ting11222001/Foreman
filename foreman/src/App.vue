@@ -5,22 +5,27 @@ import TaskModal from './components/TaskModal.vue'
 import { useTaskStore } from './stores/tasks'
 import type { Task, Status } from './stores/tasks'
 
+// Connect to the store. Pinia provides the store as a composable function. addTask, and updateTask are the functions we defined in the store to manipulate the tasks state.
 const store = useTaskStore()
 
+// Declare the reactive state for the modal's open status and the currently editing task. We use ref to create reactive references that can be updated and will trigger reactivity in the component.
 const modalOpen = ref(false)
 const editingTask = ref<Task | null>(null)
 
+// These columns never change, so we can define them as a constant array. Each column has a title and a corresponding status that matches the task's status in the store.
 const columns: { title: string; status: Status }[] = [
   { title: 'To Do',       status: 'todo' },
   { title: 'In Progress', status: 'inprogress' },
   { title: 'Done',        status: 'done' },
 ]
 
+// Clears the editing task first (so the modal starts blank), then opens the modal.
 function openNew() {
   editingTask.value = null
   modalOpen.value = true
 }
 
+// Sets the task you clicked on, then opens the modal.
 function openEdit(task: Task) {
   editingTask.value = task
   modalOpen.value = true
@@ -28,22 +33,13 @@ function openEdit(task: Task) {
 
 function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
   if (data.id) {
-    store.updateTask(data.id, {
-      title: data.title,
-      description: data.description,
-      priority: data.priority,
-      status: data.status,
-    })
+    store.updateTask(data.id, data)
   } else {
-    store.addTask({
-      title: data.title,
-      description: data.description,
-      priority: data.priority,
-      status: data.status,
-    })
+    store.addTask(data)
   }
   modalOpen.value = false
 }
+
 </script>
 
 <template>
@@ -61,12 +57,13 @@ function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
     </header>
 
     <main class="board">
+      <!-- store.byStatus[col.status]   // look up this key in the object e.g. col.status is a string like 'todo', so this is the same as writing: store.byStatus['todo'], which gives you the array of todo tasks directly from the cached map. -->
       <BoardColumn
         v-for="col in columns"
         :key="col.status"
         :title="col.title"
         :status="col.status"
-        :tasks="store.byStatus(col.status)"
+        :tasks="store.byStatus[col.status]"
         @editTask="openEdit"
         @deleteTask="store.deleteTask"
         @dropTask="store.moveTask"
