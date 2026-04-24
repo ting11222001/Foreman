@@ -302,3 +302,13 @@ DELETE http://localhost:8000/api/tasks/019dbcb1-2441-7132-8374-181c9bdea3df
 ```
 
 It should respond with 204 No content.
+
+## Add Yup
+
+### Install Yup
+
+```
+npm install yup
+```
+
+And start to addd it in TaskModal component.

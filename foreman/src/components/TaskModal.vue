@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Task, Status } from '../stores/tasks'
+import * as yup from 'yup'
 
 const props = defineProps<{
   open: boolean
@@ -18,7 +19,15 @@ const priority = ref<Task['priority']>('medium')
 const status = ref<Status>('todo')
 const titleError = ref('')
 
+/**
+ * This is a watcher. It runs code when props.open changes.
+ * Watch a prop by wrapping it in an arrow function. When props.open changes, the second function runs. val is the new value.
+ */
 watch(() => props.open, (val) => {
+  /**
+   * Every time the modal opens, this resets the form to show the current task's data or blank defaults
+   * Only do something when props.open becomes true. This means: "the modal just opened."
+   */
   if (val) {
     title.value = props.task?.title ?? ''
     description.value = props.task?.description ?? ''
@@ -28,17 +37,38 @@ watch(() => props.open, (val) => {
   }
 })
 
-function validate(): boolean {
-  if (!title.value.trim()) {
-    titleError.value = 'Task name is required'
+// Yup schema for validation (can be expanded for more complex validation rules)
+const schema = yup.object({
+  title: yup.string().required('Task name is required'),
+})
+
+/**
+ * Marking a function async does two things. It lets you use await inside it. It also makes the function itself return a Promise.
+ * await pauses the function until the Promise finishes.
+ */
+async function validate(): Promise<boolean> {
+  // console.log('Validating!')
+  try {
+    /**
+     * Give me an object to check, optionally some settings, and I will either give you back the cleaned object (success) or throw an error (failure).
+     */
+    await schema.validate({ title: title.value.trim() })
+    
+    // if we get here, validation passed
+    titleError.value = ''
+    return true
+  } catch (err) {
+    if (err instanceof yup.ValidationError) { // When Yup validation fails, it does not return false. It throws a ValidationError
+      titleError.value = err.message
+    }
     return false
   }
-  titleError.value = ''
-  return true
 }
 
-function submit() {
-  if (!validate()) return
+async function submit() {
+  if (!(await validate())) return
+
+  // once validated, emit the save event to App.vue > @save="handleSave"
   emit('save', {
     id: props.task?.id,
     title: title.value.trim(),
@@ -48,6 +78,10 @@ function submit() {
   })
 }
 
+/**
+ * e.target is the element you actually clicked. 
+ * The check classList.contains('overlay') asks: did you click the overlay itself, not something inside it?
+ */
 function onOverlayClick(e: MouseEvent) {
   if ((e.target as HTMLElement).classList.contains('overlay')) emit('close')
 }

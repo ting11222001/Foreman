@@ -36,6 +36,7 @@ function openEdit(task: Task) {
   modalOpen.value = true
 }
 
+// Once getting the save event from TaskModal, pass the data to store
 function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
   if (data.id) {
     store.updateTask(data.id, data)
