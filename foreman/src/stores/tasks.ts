@@ -47,22 +47,32 @@ export const useTaskStore = defineStore('tasks', () => {
   // --- UPDATE: PUT /api/tasks/{id} ---
   // Sends only the changed fields to the API, then updates the matching task in the store
   async function updateTask(id: string, updates: Partial<Omit<Task, 'id'>>) {
-    // Update the store to make UI feel instant
+    // Find the index of the task we're about to update in the store
     const i = tasks.value.findIndex(t => t.id === id)
-    if (i !== -1) {
-      tasks.value[i] = { ...tasks.value[i], ...updates } as Task
+
+    // if we can't find the task, do nothing
+    if (i === -1) return
+
+    // Before applying the updates after the API call, save the current state of the task in case we need to roll back
+    const previous = tasks.value[i] as Task
+
+    // Then update the store to make UI feel instant
+    tasks.value[i] = { ...tasks.value[i], ...updates } as Task
+
+    try {
+      // Then send the API request to update the database
+      const res = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      if (!res.ok) throw new Error('Failed to update task')  
+      
+      // Apply the API response to the store only when the API call succeeds.
+      tasks.value[i] = await res.json()
+    } catch (error) {
+      tasks.value[i] = previous  // If the API call fails, roll back to the previous state
     }
-
-    // Then send the API request
-    const res = await fetch(`${API_BASE}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    })
-    const updated: Task = await res.json()
-
-    // Apply the API response to the store in case the backend made any adjustments (e.g. updated_at timestamp)
-    if (i !== -1) tasks.value[i] = updated
   }
 
   // --- DELETE: DELETE /api/tasks/{id} ---

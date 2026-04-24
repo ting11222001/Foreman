@@ -36,7 +36,7 @@ function openEdit(task: Task) {
   modalOpen.value = true
 }
 
-function handleSave(data: Omit<Task, 'id'> & { id?: number }) {
+function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
   if (data.id) {
     store.updateTask(data.id, data)
   } else {
