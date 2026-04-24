@@ -57,6 +57,7 @@ function onDrop(e: DragEvent) {
 
 <template>
   <!-- :class="{ 'drag-over': isDragOver }" adds the CSS class drag-over when isDragOver is true -->
+  <!-- data-testid attribute is added for cypress tests e.g. [data-testid="column-done"] -->
   <div
     class="column"
     :class="{ 'drag-over': isDragOver }"

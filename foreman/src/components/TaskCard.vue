@@ -15,7 +15,7 @@ const priorityLabel: Record<Task['priority'], string> = {
 </script>
 
 <template>
-  <div class="card" @click="emit('edit', task)" :data-testid="`card-${task.id}`">
+  <div class="card" @click="emit('edit', task)">
     <div class="card-top">
       <span class="priority" :class="task.priority">{{ priorityLabel[task.priority] }}</span>
       <button

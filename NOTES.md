@@ -346,5 +346,38 @@ This opens the Cypress GUI. Click "E2E Testing", then choose Chrome. You will se
 
 To run headlessly (no GUI, faster):
 ```
-npx cypress run --spec "cypress/e2e/kanban.cy.ts"
+npx cypress run --spec "cypress/e2e/board.cy.ts"
+```
+
+Also, Change baseUrl to the dev server
+In `cypress.config.ts`, change:
+```
+typescriptbaseUrl: 'http://localhost:4173'
+```
+
+to:
+```
+typescriptbaseUrl: 'http://localhost:5173'
+```
+
+Then, it can start:
+```
+  (Run Starting)
+   Running:  board.cy. ts      (1 of 1)
+
+
+  Kanban board
+    √ shows three columns (1779ms)
+    √ requires a task name to save (395ms)
+    √ adds a task and shows it on the board (753ms)
+    √ opens edit modal when a card is clicked (643ms)
+    1) deletes a task when delete button is clicked
+    - persists tasks after page reload
+
+
+  4 passing (9s)
+  1 pending
+  1 failing
+
+  ...
 ```
