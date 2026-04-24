@@ -381,3 +381,62 @@ Then, it can start:
 
   ...
 ```
+
+## Add Laravel Seeding
+
+### Step 1: Create the Factory
+
+Run:
+```
+php artisan make:factory TaskFactory --model=Task
+```
+
+Edit `database/factories/TaskFactory.php`.
+
+### Step 2: Create the Seeder
+
+Run:
+```
+php artisan make:seeder TaskSeeder
+```
+
+Edit `database/seeders/TaskSeeder.php`.
+
+### Step 3: Register the Seeder
+
+Register in `database/seeders/DatabaseSeeder.php`.
+
+### Step 4: Run it
+
+Run the seeder only:
+```
+php artisan db:seed --class=TaskSeeder
+```
+
+Or reset migrations and seed everything
+```
+php artisan migrate:fresh --seed
+```
+
+Output:
+```
+  Dropping all tables .................................................................................................... 6.04ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table .............................................................................................. 10.23ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table .................................................................................. 32.65ms DONE
+  0001_01_01_000001_create_cache_table .................................................................................. 23.04ms DONE
+  0001_01_01_000002_create_jobs_table ................................................................................... 27.52ms DONE
+  2026_04_23_140601_create_tasks_table ................................................................................... 7.64ms DONE
+  2026_04_23_230355_create_personal_access_tokens_table ................................................................. 19.32ms DONE
+
+
+   INFO  Seeding database.  
+
+  Database\Seeders\TaskSeeder ................................................................................................ RUNNING  
+  Database\Seeders\TaskSeeder ............................................................................................. 65 ms DONE 
+  ```
