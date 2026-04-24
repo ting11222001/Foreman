@@ -312,3 +312,39 @@ npm install yup
 ```
 
 And start to addd it in TaskModal component.
+
+
+## Add Cypress
+
+### Run the first three Cypress tests
+
+#### Step 1: Start both servers
+You need two terminals open at the same time.
+
+Terminal 1, Laravel backend:
+```
+php artisan serve
+```
+
+This starts the API at http://localhost:8000.
+
+Terminal 2, Vue frontend:
+```
+npm run dev
+```
+
+This starts the frontend at http://localhost:5173 (Vite default).
+
+#### Step 2: Open Cypress
+
+Terminal 3:
+```
+npx cypress open
+```
+
+This opens the Cypress GUI. Click "E2E Testing", then choose Chrome. You will see your test file listed. Click it to run.
+
+To run headlessly (no GUI, faster):
+```
+npx cypress run --spec "cypress/e2e/kanban.cy.ts"
+```

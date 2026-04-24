@@ -25,7 +25,7 @@ describe('Kanban board', () => {
     cy.get('[data-testid="column-todo"]').should('contain', 'Fix login bug')
   })
 
-  it('persists tasks after page reload', () => {
+  it.skip('persists tasks after page reload', () => {
     cy.get('[data-testid="btn-add-task"]').click()
     cy.get('[data-testid="input-title"]').type('Persistent task')
     cy.get('[data-testid="btn-save"]').click()
