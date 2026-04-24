@@ -47,14 +47,21 @@ export const useTaskStore = defineStore('tasks', () => {
   // --- UPDATE: PUT /api/tasks/{id} ---
   // Sends only the changed fields to the API, then updates the matching task in the store
   async function updateTask(id: string, updates: Partial<Omit<Task, 'id'>>) {
+    // Update the store to make UI feel instant
+    const i = tasks.value.findIndex(t => t.id === id)
+    if (i !== -1) {
+      tasks.value[i] = { ...tasks.value[i], ...updates } as Task
+    }
+
+    // Then send the API request
     const res = await fetch(`${API_BASE}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     })
     const updated: Task = await res.json()
-    console.log('Updated task from API:', updated)
-    const i = tasks.value.findIndex(t => t.id === id)
+
+    // Apply the API response to the store in case the backend made any adjustments (e.g. updated_at timestamp)
     if (i !== -1) tasks.value[i] = updated
   }
 
