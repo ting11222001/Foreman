@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-// Define the sape Task interface and Status type
+// Define the shape of Task interface and Status type
 // This is a union type. It means Status can only ever be one of those three strings.
 export type Status = 'todo' | 'inprogress' | 'done'
 
@@ -14,48 +14,55 @@ export interface Task {
   status: Status
 }
 
-// localStorage helpers --> will replace this part with Laravel APIs
-const STORAGE_KEY = 'kanban-tasks'
-
-function load(): Task[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') // JSON.parse converts the string back to an array and defaults to an empty array string
-  } catch {
-    return []
-  }
-}
-
-function save(tasks: Task[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)) // JSON.stringify converts the array to a string so localStorage can store it.
-}
+// Base URL for all API calls — points to your Laravel backend
+const API_BASE = 'http://localhost:8000/api/tasks'
 
 // Define the store using Pinia's defineStore function. The first argument is the unique name of the store, and the second is a setup function that returns the state and actions.
 // A composable is a function that contains reusable logic using the Composition API.
 // Think of it like a helper function you can call inside any component to get shared state or behavior. In Vue, the convention is to name these functions with use at the start, like useTaskStore
 export const useTaskStore = defineStore('tasks', () => {
   // ref makes the array reactive. Vue will re-render anything that reads tasks.value when it changes. 
-  // load() runs once at startup to restore tasks from localStorage.
-  const tasks = ref<Task[]>(load())
+  // tasks start empty. fetchTasks() will populate it from the API
+  const tasks = ref<Task[]>([])
 
-  // addTask takes a task without an id, generates one, pushes it to the array, then saves.
-  function addTask(task: Omit<Task, 'id'>) {
-    tasks.value.push({ ...task, id: crypto.randomUUID() }) // update store
-    save(tasks.value)                                      // persist the change                              
+  // --- FETCH: GET /api/tasks ---
+  // Loads all tasks from the API and stores them in tasks.value
+  async function fetchTasks() {
+    const res = await fetch(API_BASE)
+    tasks.value = await res.json()
   }
 
-  // updateTask takes a task ID and an object containing the updates, finds the task, and updates it.
-  function updateTask(id: string, updates: Partial<Omit<Task, 'id'>>) {
+  // --- ADD: POST /api/tasks ---
+  // Sends the new task to the API, then adds the returned task (with its real ID) to the store
+  async function addTask(task: Omit<Task, 'id'>) {
+    const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      })
+      const created: Task = await res.json()
+      tasks.value.push(created)                          
+  }
+
+  // --- UPDATE: PUT /api/tasks/{id} ---
+  // Sends only the changed fields to the API, then updates the matching task in the store
+  async function updateTask(id: string, updates: Partial<Omit<Task, 'id'>>) {
+    const res = await fetch(`${API_BASE}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    })
+    const updated: Task = await res.json()
+    console.log('Updated task from API:', updated)
     const i = tasks.value.findIndex(t => t.id === id)
-    if (i !== -1) {
-      tasks.value[i] = { ...tasks.value[i], ...updates } as Task  // update store
-      save(tasks.value)                                           // persist the change  
-    }
+    if (i !== -1) tasks.value[i] = updated
   }
 
-  // deleteTask replaces the array with a filtered version that excludes the target id.
-  function deleteTask(id: string) {
-    tasks.value = tasks.value.filter(t => t.id !== id)  // update store
-    save(tasks.value)                                   // persist the change
+  // --- DELETE: DELETE /api/tasks/{id} ---
+  // Tells the API to delete the task, then removes it from the store
+  async function deleteTask(id: string) {
+    await fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
+    tasks.value = tasks.value.filter(t => t.id !== id)
   }
 
   function moveTask(id: string, status: Status) {
@@ -86,5 +93,5 @@ export const useTaskStore = defineStore('tasks', () => {
     return map
   })
 
-  return { tasks, addTask, updateTask, deleteTask, moveTask, byStatus  }
+  return { tasks, addTask, updateTask, deleteTask, moveTask, byStatus, fetchTasks  }
 })

@@ -29,14 +29,14 @@ const isDragOver = ref(false)     // when isDragOver = true, it visually highlig
 // The e.preventDefault() is a browser rule: by default, most elements reject drops. 
 // Calling preventDefault() tells the browser "this column accepts drops." Without it, onDrop never runs. 
 function onDragOver(e: DragEvent) {
-  console.log('dragging over', props.status)
+  // console.log('dragging over', props.status)
   e.preventDefault()
   isDragOver.value = true
 }
 
 // onDragLeave fires when you drag the card back out without dropping. It just turns off the highlight.
 function onDragLeave() {
-  console.log('dragging leave', props.status)
+  // console.log('dragging leave', props.status)
   isDragOver.value = false
 }
 
@@ -50,7 +50,7 @@ function onDrop(e: DragEvent) {
   isDragOver.value = false
 
   const id = e.dataTransfer?.getData('taskId')
-  console.log(`Dropped task ${id} into ${props.status}`)
+  // console.log(`Dropped task ${id} into ${props.status}`)
   if (id) emit('dropTask', id, props.status)
 }
 </script>

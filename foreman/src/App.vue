@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import BoardColumn from './components/BoardColumn.vue'
 import TaskModal from './components/TaskModal.vue'
 import { useTaskStore } from './stores/tasks'
@@ -7,6 +7,11 @@ import type { Task, Status } from './stores/tasks'
 
 // Connect to the store. Pinia provides the store as a composable function. addTask, and updateTask are the functions we defined in the store to manipulate the tasks state.
 const store = useTaskStore()
+
+// Call fetchTasks() once when your app loads. 
+onMounted(() => {
+  store.fetchTasks()
+})
 
 // Declare the reactive state for the modal's open status and the currently editing task. We use ref to create reactive references that can be updated and will trigger reactivity in the component.
 const modalOpen = ref(false)
@@ -31,7 +36,7 @@ function openEdit(task: Task) {
   modalOpen.value = true
 }
 
-function handleSave(data: Omit<Task, 'id'> & { id?: string }) {
+function handleSave(data: Omit<Task, 'id'> & { id?: number }) {
   if (data.id) {
     store.updateTask(data.id, data)
   } else {
